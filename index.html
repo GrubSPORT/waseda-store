@@ -2,57 +2,53 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>疎通テスト</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>早稲田大学バスケットボール部 ONLINE STORE</title>
 <style>
-  body{font-family:sans-serif;max-width:560px;margin:0 auto;padding:20px;}
-  button{width:100%;height:52px;font-size:16px;border:none;border-radius:10px;background:#9E1B32;color:#fff;font-weight:bold;cursor:pointer;}
-  .box{background:#f4f2f5;padding:14px;border-radius:8px;margin-top:16px;font-size:14px;white-space:pre-wrap;word-break:break-all;}
-  .ok{color:#1a7f37;font-weight:bold;}
-  .ng{color:#C0141E;font-weight:bold;}
+  :root{ --primary:#9E1B32; --ink:#16151a; --muted:#6b6770; --line:#e6e3e8; --bg:#f4f2f5; }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Noto Sans JP",sans-serif;line-height:1.7;}
+  .wrap{max-width:520px;margin:0 auto;padding:0 20px 60px;}
+  header{background:linear-gradient(180deg,#2a2530,var(--primary));color:#fff;padding:34px 20px;text-align:center;}
+  header .team{font-size:14px;letter-spacing:.06em;margin:0;font-weight:700;opacity:.9;}
+  header .store{font-size:22px;font-weight:700;margin:6px 0 0;letter-spacing:.03em;}
+  .ig-note{display:none;background:#fff3cd;border:1px solid #ffe08a;border-radius:10px;padding:14px;margin:20px 0 0;font-size:14px;}
+  .ig-note b{color:#9E1B32;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;margin-top:20px;text-align:center;}
+  .card p{margin:0 0 18px;font-size:15px;}
+  .btn{display:block;width:100%;padding:16px;background:var(--primary);color:#fff;text-decoration:none;border-radius:12px;font-size:17px;font-weight:700;letter-spacing:.03em;}
+  .sub{font-size:12px;color:var(--muted);margin-top:14px;}
+  footer{text-align:center;margin-top:28px;font-size:11px;color:var(--muted);letter-spacing:.08em;}
 </style>
 </head>
 <body>
-<h2>GAS疎通テスト（自動判定）</h2>
-<p>ボタンを押すと fetch と JSONP の両方を自動で試します。</p>
-<button id="btn">テスト実行</button>
-<div class="box" id="result">ここに結果が出ます</div>
+<header>
+  <p class="team">WASEDA UNIVERSITY BASKETBALL</p>
+  <p class="store">ONLINE STORE</p>
+</header>
+<div class="wrap">
+
+  <div class="ig-note" id="igNote">
+    <b>フォームが開かない場合</b><br>
+    画面右上の「<b>…</b>」→「<b>ブラウザで開く</b>」（Safari / Chrome）を選んでから、下のボタンを押してください。
+  </div>
+
+  <div class="card">
+    <p>下のボタンから注文フォームに進めます。</p>
+    <a class="btn" id="orderBtn" href="https://script.google.com/macros/s/AKfycbym2b64KufXchTpxOT10SyJaZX0B-h0E-_FGa57aSR5DUS0BiI1xg2SqDoAP9phzv_LUA/exec?team=WASEDA_BB" target="_blank" rel="noopener">注文フォームを開く</a>
+    <p class="sub">ボタンを押すと注文ページが開きます。<br>受付期間・商品はページ内でご確認ください。</p>
+  </div>
+
+  <footer>POWERED BY GRUB SPORT</footer>
+</div>
 
 <script>
-  var GAS_URL = "https://script.google.com/macros/s/AKfycbym2b64KufXchTpxOT10SyJaZX0B-h0E-_FGa57aSR5DUS0BiI1xg2SqDoAP9phzv_LUA/exec";
-  var TEAM = "WASEDA_BB";
-  var box = document.getElementById("result");
-
-  function log(msg){ box.innerHTML += "\n" + msg; }
-
-  document.getElementById("btn").onclick = function(){
-    box.innerHTML = "テスト開始...";
-
-    // ① fetch方式を試す
-    var url = GAS_URL + "?api=ping&team=" + encodeURIComponent(TEAM);
-    fetch(url)
-      .then(function(r){ return r.text(); })
-      .then(function(t){
-        try { var j = JSON.parse(t);
-          log('<span class="ok">✅ fetch成功：'+ JSON.stringify(j) +'</span>');
-        } catch(e){ log('<span class="ng">⚠ fetch応答がJSONでない：'+ t.slice(0,120) +'</span>'); }
-      })
-      .catch(function(e){ log('<span class="ng">❌ fetch失敗：'+ e +'</span>'); });
-
-    // ② JSONP方式を試す（3秒待って結果が来なければ失敗表示）
-    window.__jsonp_done = false;
-    window.jsonpCallback = function(data){
-      window.__jsonp_done = true;
-      log('<span class="ok">✅ JSONP成功：'+ JSON.stringify(data) +'</span>');
-    };
-    var s = document.createElement("script");
-    s.src = GAS_URL + "?api=ping&team=" + encodeURIComponent(TEAM) + "&callback=jsonpCallback";
-    s.onerror = function(){ log('<span class="ng">❌ JSONP失敗（script読込エラー）</span>'); };
-    document.body.appendChild(s);
-    setTimeout(function(){
-      if(!window.__jsonp_done) log('<span class="ng">❌ JSONP失敗（3秒応答なし）</span>');
-    }, 3000);
-  };
+  // Instagram / Facebook などアプリ内ブラウザを検知して案内を表示
+  (function(){
+    var ua = navigator.userAgent || "";
+    var inApp = /Instagram|FBAN|FBAV|FB_IAB|Line/i.test(ua);
+    if(inApp){ document.getElementById("igNote").style.display = "block"; }
+  })();
 </script>
 </body>
 </html>

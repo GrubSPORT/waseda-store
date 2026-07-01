@@ -7,23 +7,52 @@
 <style>
   body{font-family:sans-serif;max-width:560px;margin:0 auto;padding:20px;}
   button{width:100%;height:52px;font-size:16px;border:none;border-radius:10px;background:#9E1B32;color:#fff;font-weight:bold;cursor:pointer;}
-  pre{background:#f4f2f5;padding:14px;border-radius:8px;white-space:pre-wrap;word-break:break-all;font-size:13px;margin-top:16px;}
+  .box{background:#f4f2f5;padding:14px;border-radius:8px;margin-top:16px;font-size:14px;white-space:pre-wrap;word-break:break-all;}
   .ok{color:#1a7f37;font-weight:bold;}
   .ng{color:#C0141E;font-weight:bold;}
 </style>
 </head>
 <body>
-<h2>GAS疎通テスト（CORS確認）</h2>
-<p>下のボタンを押すと、母艦GASをfetchで呼び出します。</p>
+<h2>GAS疎通テスト（自動判定）</h2>
+<p>ボタンを押すと fetch と JSONP の両方を自動で試します。</p>
 <button id="btn">テスト実行</button>
-<div id="status"></div>
-<pre id="out">結果がここに出ます</pre>
+<div class="box" id="result">ここに結果が出ます</div>
 
 <script>
   var GAS_URL = "https://script.google.com/macros/s/AKfycbym2b64KufXchTpxOT10SyJaZX0B-h0E-_FGa57aSR5DUS0BiI1xg2SqDoAP9phzv_LUA/exec";
   var TEAM = "WASEDA_BB";
+  var box = document.getElementById("result");
+
+  function log(msg){ box.innerHTML += "\n" + msg; }
 
   document.getElementById("btn").onclick = function(){
-    var st = document.getElementById("status");
-    var out = document.getElementById("out");
-    st.innerHTML = "通信中...";
+    box.innerHTML = "テスト開始...";
+
+    // ① fetch方式を試す
+    var url = GAS_URL + "?api=ping&team=" + encodeURIComponent(TEAM);
+    fetch(url)
+      .then(function(r){ return r.text(); })
+      .then(function(t){
+        try { var j = JSON.parse(t);
+          log('<span class="ok">✅ fetch成功：'+ JSON.stringify(j) +'</span>');
+        } catch(e){ log('<span class="ng">⚠ fetch応答がJSONでない：'+ t.slice(0,120) +'</span>'); }
+      })
+      .catch(function(e){ log('<span class="ng">❌ fetch失敗：'+ e +'</span>'); });
+
+    // ② JSONP方式を試す（3秒待って結果が来なければ失敗表示）
+    window.__jsonp_done = false;
+    window.jsonpCallback = function(data){
+      window.__jsonp_done = true;
+      log('<span class="ok">✅ JSONP成功：'+ JSON.stringify(data) +'</span>');
+    };
+    var s = document.createElement("script");
+    s.src = GAS_URL + "?api=ping&team=" + encodeURIComponent(TEAM) + "&callback=jsonpCallback";
+    s.onerror = function(){ log('<span class="ng">❌ JSONP失敗（script読込エラー）</span>'); };
+    document.body.appendChild(s);
+    setTimeout(function(){
+      if(!window.__jsonp_done) log('<span class="ng">❌ JSONP失敗（3秒応答なし）</span>');
+    }, 3000);
+  };
+</script>
+</body>
+</html>

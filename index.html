@@ -12,11 +12,21 @@
   header{background:linear-gradient(180deg,#2a2530,var(--primary));color:#fff;padding:34px 20px;text-align:center;}
   header .team{font-size:14px;letter-spacing:.06em;margin:0;font-weight:700;opacity:.9;}
   header .store{font-size:22px;font-weight:700;margin:6px 0 0;letter-spacing:.03em;}
-  .ig-note{display:none;background:#fff3cd;border:1px solid #ffe08a;border-radius:10px;padding:14px;margin:20px 0 0;font-size:14px;}
-  .ig-note b{color:#9E1B32;}
-  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;margin-top:20px;text-align:center;}
+
+  /* アプリ内ブラウザ用の手順カード（既定は非表示） */
+  .guide{display:none;background:#fff;border:2px solid var(--primary);border-radius:14px;padding:20px;margin-top:20px;}
+  .guide h3{margin:0 0 14px;font-size:16px;color:var(--primary);text-align:center;}
+  .step{display:flex;align-items:flex-start;gap:12px;margin:0 0 14px;}
+  .step:last-child{margin-bottom:0;}
+  .num{flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;}
+  .step-txt{font-size:15px;line-height:1.6;}
+  .step-txt b{color:var(--primary);}
+  .dots{display:inline-block;background:#eee;border-radius:6px;padding:1px 8px;font-weight:700;letter-spacing:2px;}
+  .android-note{font-size:12px;color:var(--muted);margin-top:12px;border-top:1px dashed var(--line);padding-top:10px;}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;margin-top:16px;text-align:center;}
   .card p{margin:0 0 16px;font-size:15px;}
-  .btn{display:block;width:100%;padding:16px;background:var(--primary);color:#fff;text-decoration:none;border-radius:12px;font-size:17px;font-weight:700;letter-spacing:.03em;border:none;cursor:pointer;font-family:inherit;}
+  .btn{display:block;width:100%;padding:16px;background:var(--primary);color:#fff;text-decoration:none;border-radius:12px;font-size:17px;font-weight:700;letter-spacing:.03em;}
   .btn2{display:block;width:100%;padding:13px;background:#fff;color:var(--primary);border:1.5px solid var(--primary);border-radius:12px;font-size:14px;font-weight:700;margin-top:12px;cursor:pointer;font-family:inherit;}
   .sub{font-size:12px;color:var(--muted);margin-top:14px;}
   .copied{display:none;color:#1a7f37;font-size:13px;font-weight:700;margin-top:10px;}
@@ -30,16 +40,29 @@
 </header>
 <div class="wrap">
 
-  <div class="ig-note" id="igNote">
-    <b>スマホのアプリ内で開いています。</b><br>
-    下のボタンで Safari / Chrome が開き、注文フォームに進めます。開かない場合は「URLをコピー」してブラウザに貼り付けてください。
+  <!-- Instagram等アプリ内ブラウザでのみ表示 -->
+  <div class="guide" id="guide">
+    <h3>⚠ 注文フォームを開く前に</h3>
+    <div class="step">
+      <div class="num">1</div>
+      <div class="step-txt">画面右上の <span class="dots">…</span> をタップ</div>
+    </div>
+    <div class="step">
+      <div class="num">2</div>
+      <div class="step-txt">メニューの「<b>外部ブラウザーで開く</b>」を選択</div>
+    </div>
+    <div class="step">
+      <div class="num">3</div>
+      <div class="step-txt">開いたSafari等で、下の「<b>注文フォームを開く</b>」を押す</div>
+    </div>
+    <div class="android-note">Androidの場合は右上「 ⋮ 」→「ブラウザで開く」等を選んでください。</div>
   </div>
 
   <div class="card">
     <p>下のボタンから注文フォームに進めます。</p>
-    <a class="btn" id="orderBtn" href="#">注文フォームを開く</a>
+    <a class="btn" href="https://script.google.com/macros/s/AKfycbym2b64KufXchTpxOT10SyJaZX0B-h0E-_FGa57aSR5DUS0BiI1xg2SqDoAP9phzv_LUA/exec?team=WASEDA_BB">注文フォームを開く</a>
     <button class="btn2" id="copyBtn" type="button">開けない場合：URLをコピー</button>
-    <div class="copied" id="copied">✅ コピーしました。Safari/Chromeのアドレス欄に貼り付けてください。</div>
+    <div class="copied" id="copied">✅ コピーしました。ブラウザのアドレス欄に貼り付けて開いてください。</div>
     <p class="sub">受付期間・商品はフォーム内でご確認ください。</p>
   </div>
 
@@ -48,29 +71,17 @@
 
 <script>
   var FORM_URL = "https://script.google.com/macros/s/AKfycbym2b64KufXchTpxOT10SyJaZX0B-h0E-_FGa57aSR5DUS0BiI1xg2SqDoAP9phzv_LUA/exec?team=WASEDA_BB";
-
   var ua = navigator.userAgent || "";
-  var isIOS = /iPhone|iPad|iPod/i.test(ua);
   var inApp = /Instagram|FBAN|FBAV|FB_IAB|Line/i.test(ua);
 
-  // アプリ内ブラウザなら案内を表示
-  if(inApp){ document.getElementById("igNote").style.display = "block"; }
+  // アプリ内ブラウザなら手順カードを表示
+  if(inApp){ document.getElementById("guide").style.display = "block"; }
 
-  // ボタン：iOSアプリ内は x-safari- でSafari強制、それ以外は通常遷移
-  var btn = document.getElementById("orderBtn");
-  if(isIOS && inApp){
-    btn.setAttribute("href", "x-safari-" + FORM_URL);
-  } else {
-    btn.setAttribute("href", FORM_URL);
-    btn.setAttribute("target", "_blank");
-    btn.setAttribute("rel", "noopener");
-  }
-
-  // コピー保険
+  // URLコピー（保険）
   document.getElementById("copyBtn").onclick = function(){
     var done = function(){ document.getElementById("copied").style.display = "block"; };
     if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(FORM_URL).then(done).catch(function(){ fallback(); });
+      navigator.clipboard.writeText(FORM_URL).then(done).catch(fallback);
     } else { fallback(); }
     function fallback(){
       var t = document.createElement("textarea");

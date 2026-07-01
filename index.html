@@ -15,9 +15,11 @@
   .ig-note{display:none;background:#fff3cd;border:1px solid #ffe08a;border-radius:10px;padding:14px;margin:20px 0 0;font-size:14px;}
   .ig-note b{color:#9E1B32;}
   .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;margin-top:20px;text-align:center;}
-  .card p{margin:0 0 18px;font-size:15px;}
-  .btn{display:block;width:100%;padding:16px;background:var(--primary);color:#fff;text-decoration:none;border-radius:12px;font-size:17px;font-weight:700;letter-spacing:.03em;}
+  .card p{margin:0 0 16px;font-size:15px;}
+  .btn{display:block;width:100%;padding:16px;background:var(--primary);color:#fff;text-decoration:none;border-radius:12px;font-size:17px;font-weight:700;letter-spacing:.03em;border:none;cursor:pointer;font-family:inherit;}
+  .btn2{display:block;width:100%;padding:13px;background:#fff;color:var(--primary);border:1.5px solid var(--primary);border-radius:12px;font-size:14px;font-weight:700;margin-top:12px;cursor:pointer;font-family:inherit;}
   .sub{font-size:12px;color:var(--muted);margin-top:14px;}
+  .copied{display:none;color:#1a7f37;font-size:13px;font-weight:700;margin-top:10px;}
   footer{text-align:center;margin-top:28px;font-size:11px;color:var(--muted);letter-spacing:.08em;}
 </style>
 </head>
@@ -29,26 +31,54 @@
 <div class="wrap">
 
   <div class="ig-note" id="igNote">
-    <b>フォームが開かない場合</b><br>
-    画面右上の「<b>…</b>」→「<b>ブラウザで開く</b>」（Safari / Chrome）を選んでから、下のボタンを押してください。
+    <b>スマホのアプリ内で開いています。</b><br>
+    下のボタンで Safari / Chrome が開き、注文フォームに進めます。開かない場合は「URLをコピー」してブラウザに貼り付けてください。
   </div>
 
   <div class="card">
     <p>下のボタンから注文フォームに進めます。</p>
-    <a class="btn" id="orderBtn" href="https://script.google.com/macros/s/AKfycbym2b64KufXchTpxOT10SyJaZX0B-h0E-_FGa57aSR5DUS0BiI1xg2SqDoAP9phzv_LUA/exec?team=WASEDA_BB" target="_blank" rel="noopener">注文フォームを開く</a>
-    <p class="sub">ボタンを押すと注文ページが開きます。<br>受付期間・商品はページ内でご確認ください。</p>
+    <a class="btn" id="orderBtn" href="#">注文フォームを開く</a>
+    <button class="btn2" id="copyBtn" type="button">開けない場合：URLをコピー</button>
+    <div class="copied" id="copied">✅ コピーしました。Safari/Chromeのアドレス欄に貼り付けてください。</div>
+    <p class="sub">受付期間・商品はフォーム内でご確認ください。</p>
   </div>
 
   <footer>POWERED BY GRUB SPORT</footer>
 </div>
 
 <script>
-  // Instagram / Facebook などアプリ内ブラウザを検知して案内を表示
-  (function(){
-    var ua = navigator.userAgent || "";
-    var inApp = /Instagram|FBAN|FBAV|FB_IAB|Line/i.test(ua);
-    if(inApp){ document.getElementById("igNote").style.display = "block"; }
-  })();
+  var FORM_URL = "https://script.google.com/macros/s/AKfycbym2b64KufXchTpxOT10SyJaZX0B-h0E-_FGa57aSR5DUS0BiI1xg2SqDoAP9phzv_LUA/exec?team=WASEDA_BB";
+
+  var ua = navigator.userAgent || "";
+  var isIOS = /iPhone|iPad|iPod/i.test(ua);
+  var inApp = /Instagram|FBAN|FBAV|FB_IAB|Line/i.test(ua);
+
+  // アプリ内ブラウザなら案内を表示
+  if(inApp){ document.getElementById("igNote").style.display = "block"; }
+
+  // ボタン：iOSアプリ内は x-safari- でSafari強制、それ以外は通常遷移
+  var btn = document.getElementById("orderBtn");
+  if(isIOS && inApp){
+    btn.setAttribute("href", "x-safari-" + FORM_URL);
+  } else {
+    btn.setAttribute("href", FORM_URL);
+    btn.setAttribute("target", "_blank");
+    btn.setAttribute("rel", "noopener");
+  }
+
+  // コピー保険
+  document.getElementById("copyBtn").onclick = function(){
+    var done = function(){ document.getElementById("copied").style.display = "block"; };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(FORM_URL).then(done).catch(function(){ fallback(); });
+    } else { fallback(); }
+    function fallback(){
+      var t = document.createElement("textarea");
+      t.value = FORM_URL; document.body.appendChild(t); t.select();
+      try { document.execCommand("copy"); done(); } catch(e){}
+      document.body.removeChild(t);
+    }
+  };
 </script>
 </body>
 </html>
